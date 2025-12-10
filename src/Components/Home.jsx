@@ -61,7 +61,7 @@ export default function Homepage() {
       description: 'Professional gatherings that inspire and connect your team.',
       color: '#4A7BFF',
       features: ['Team Building', 'Annual Galas', 'Product Launches'],
-      image: '/images/corporate-events.jpg'
+      image: '/cor.webp'
     },
     {
       icon: Heart,
@@ -69,7 +69,7 @@ export default function Homepage() {
       description: 'Your perfect day, planned to perfection with love and care.',
       color: '#FF6B9D',
       features: ['Full Planning', 'Day Coordination', 'Venue Selection'],
-      image: '/images/weddings.jpg'
+      image: '/wed.webp'
     },
     {
       icon: Briefcase,
@@ -77,7 +77,7 @@ export default function Homepage() {
       description: 'Showcase your brand with stunning, impactful displays.',
       color: '#9CF3FF',
       features: ['Booth Design', 'Brand Activation', 'Trade Shows'],
-      image: '/images/exhibitions.jpg'
+      image: '/ex.webp'
     },
     {
       icon: PartyPopper,
@@ -85,7 +85,7 @@ export default function Homepage() {
       description: 'Birthdays, anniversaries, and milestones worth celebrating.',
       color: '#FFB84D',
       features: ['Themed Parties', 'Milestone Events', 'Intimate Gatherings'],
-      image: '/images/private-celebrations.jpg'
+      image: '/pr.webp'
     },
     {
       icon: Mic2,
@@ -93,7 +93,7 @@ export default function Homepage() {
       description: 'Seamless execution of large-scale professional gatherings.',
       color: '#B088F9',
       features: ['AV Production', 'Registration', 'Logistics'],
-      image: '/images/conferences.jpg'
+      image: '/con.webp'
     },
     {
       icon: Music,
@@ -101,7 +101,7 @@ export default function Homepage() {
       description: 'World-class performers and production for any occasion.',
       color: '#FF8A5C',
       features: ['Live Bands', 'DJs', 'Cultural Shows'],
-      image: '/images/entertainment.jpg'
+      image: '/en.webp'
     }
   ];
 
@@ -330,7 +330,7 @@ export default function Homepage() {
                   }}
                 />
                 <img 
-                  src="/dlogo.png" 
+                  src="/dlogo.webp" 
                   alt="Diamond Dreams"
                   className="relative w-full h-full object-contain"
                 />
