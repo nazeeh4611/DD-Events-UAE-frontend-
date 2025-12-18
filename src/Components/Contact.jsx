@@ -1,9 +1,42 @@
-import React from "react";
-import { motion, useInView } from "framer-motion";
-import { useRef, useState } from "react";
-import { Phone, Mail, MapPin, Send, CheckCircle } from "lucide-react";
+import React, { useEffect, useState, useRef } from 'react';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { 
+  ArrowRight, 
+  Sparkles, 
+  Calendar, 
+  Award,
+  Star,
+  Check,
+  ChevronRight,
+  Play,
+  Building2,
+  Heart,
+  Briefcase,
+  PartyPopper,
+  Mic2,
+  Camera,
+  Music,
+  Phone,
+  Mail,
+  MapPin,
+  Quote,
+  Target,
+  Users,
+  Lightbulb,
+  Globe,
+  Trophy,
+  Shield,
+  Clock,
+  Zap,
+  Smile,
+  Award as AwardIcon,
+  CheckCircle,
+  Users as UsersIcon,
+  BarChart
+} from 'lucide-react';
 
-export default function ContactPage() {
+
+ function ContactPage() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
 
@@ -21,37 +54,58 @@ export default function ContactPage() {
   const handleChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        eventType: "",
-        message: "",
+    const formPayload = new FormData();
+    formPayload.append("access_key", "YOUR_WEB3FORMS_ACCESS_KEY");
+    formPayload.append("name", formData.name);
+    formPayload.append("email", formData.email);
+    formPayload.append("phone", formData.phone);
+    formPayload.append("eventType", formData.eventType);
+    formPayload.append("message", formData.message);
+    formPayload.append("subject", "New Contact Form Submission - Diamond Dreams");
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formPayload,
       });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setIsSubmitted(true);
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          eventType: "",
+          message: "",
+        });
+      } else {
+        console.error("Form submission failed:", result.message);
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setIsSubmitting(false);
       setTimeout(() => setIsSubmitted(false), 4000);
-    }, 2000);
+    }
   };
 
   const contactInfo = [
-    { icon: Phone, title: "Phone", details: "+971 522703351", link: "tel:+971522703351" },
-    { icon: Mail, title: "Email", details: "info@diamonddreams.ae", link: "mailto:info@diamonddreams.ae" },
+    { icon: Phone, title: "Phone", details: "+971 52 270 3352", link: "tel:+971522703352" },
+    { icon: Mail, title: "Email", details: "Info@ddeventsuae.com", link: "mailto:Info@ddeventsuae.com" },
     { icon: MapPin, title: "Location", details: "Al Falah St, Abu Dhabi, UAE", link: "https://maps.google.com" },
   ];
 
-  // Page animation
   const pageVariants = {
     hidden: { opacity: 0, y: 40 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } }
   };
 
-  // Stagger animations
   const stagger = {
     hidden: {},
     visible: {
@@ -76,7 +130,6 @@ export default function ContactPage() {
       animate="visible"
       variants={pageVariants}
     >
-      {/* Floating BG animation */}
       <motion.div
         className="absolute inset-0"
         aria-hidden="true"
@@ -93,7 +146,6 @@ export default function ContactPage() {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header */}
         <motion.div
           className="text-center mb-16"
           variants={fadeUp}
@@ -107,13 +159,11 @@ export default function ContactPage() {
           </p>
         </motion.div>
 
-        {/* GRID WRAPPER with stagger */}
         <motion.div
           className="grid lg:grid-cols-2 gap-12"
           variants={stagger}
         >
 
-          {/* Contact Info */}
           <motion.div variants={fadeUp}>
             <h3 className="text-2xl md:text-3xl text-white mb-4">
               Contact <span className="gradient-text">Information</span>
@@ -128,9 +178,9 @@ export default function ContactPage() {
                   variants={fadeUp}
                   key={index}
                   href={info.link}
-                  className="flex items-start gap-4 glass p-6 rounded-xl hover:border-[#9CF3FF] smooth-transition group"
+                  className="flex items-start gap-4 glass p-6 rounded-xl hover:border-[#9CF3FF] transition-all group"
                 >
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center glass group-hover:glow-blue transition-all">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center glass group-hover:bg-[#4A7BFF20] transition-all">
                     <info.icon className="w-6 h-6 text-[#9CF3FF]" />
                   </div>
                   <div>
@@ -153,9 +203,10 @@ export default function ContactPage() {
             </motion.div>
           </motion.div>
 
-          {/* Contact Form */}
           <motion.div variants={fadeUp}>
             <form onSubmit={handleSubmit} className="glass p-8 rounded-xl">
+              <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_ACCESS_KEY" />
+              <input type="hidden" name="subject" value="New Contact Form Submission - Diamond Dreams" />
 
               {isSubmitted ? (
                 <motion.div
@@ -181,7 +232,7 @@ export default function ContactPage() {
                         value={formData.name}
                         onChange={handleChange}
                         placeholder="Your Name"
-                        className="w-full px-4 py-3 glass rounded-lg text-white placeholder-gray-500"
+                        className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-[#9CF3FF] focus:outline-none transition-colors"
                       />
                     </motion.div>
 
@@ -195,7 +246,7 @@ export default function ContactPage() {
                           value={formData.email}
                           onChange={handleChange}
                           placeholder="your@email.com"
-                          className="w-full px-4 py-3 glass rounded-lg text-white placeholder-gray-500"
+                          className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-[#9CF3FF] focus:outline-none transition-colors"
                         />
                       </motion.div>
 
@@ -207,7 +258,7 @@ export default function ContactPage() {
                           value={formData.phone}
                           onChange={handleChange}
                           placeholder="+971 XXX XXXX"
-                          className="w-full px-4 py-3 glass rounded-lg text-white placeholder-gray-500"
+                          className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-[#9CF3FF] focus:outline-none transition-colors"
                         />
                       </motion.div>
                     </div>
@@ -219,14 +270,17 @@ export default function ContactPage() {
                         required
                         value={formData.eventType}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 glass rounded-lg text-white"
+                        className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white focus:border-[#9CF3FF] focus:outline-none transition-colors"
                       >
                         <option value="">Select Event Type</option>
-                        <option value="Corporate">Corporate Event</option>
                         <option value="Wedding">Wedding</option>
-                        <option value="Exhibition">Exhibition</option>
-                        <option value="Private">Private Party</option>
-                        <option value="Entertainment">Entertainment</option>
+                        <option value="Personal Party">Personal Party</option>
+                        <option value="Proposal Event">Proposal Event</option>
+                        <option value="Birthday Party">Birthday Party</option>
+                        <option value="Festival">Festival</option>
+                        <option value="Baby Shower">Baby Shower</option>
+                        <option value="Corporate Event">Corporate Event</option>
+                        <option value="Product Launch">Product Launch</option>
                         <option value="Other">Other</option>
                       </select>
                     </motion.div>
@@ -240,7 +294,7 @@ export default function ContactPage() {
                         value={formData.message}
                         onChange={handleChange}
                         placeholder="Tell us about your event..."
-                        className="w-full px-4 py-3 glass rounded-lg text-white placeholder-gray-500 resize-none"
+                        className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white placeholder-gray-500 resize-none focus:border-[#9CF3FF] focus:outline-none transition-colors"
                       />
                     </motion.div>
                   </div>
@@ -250,7 +304,7 @@ export default function ContactPage() {
                     disabled={isSubmitting}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
-                    className="w-full mt-6 px-8 py-4 gradient-bg rounded-full text-white flex items-center justify-center gap-2"
+                    className="w-full mt-6 px-8 py-4 bg-gradient-to-r from-[#4A7BFF] to-[#6A5BFF] rounded-full text-white flex items-center justify-center gap-2 font-semibold"
                   >
                     {isSubmitting ? (
                       <>
@@ -263,18 +317,19 @@ export default function ContactPage() {
                       </>
                     ) : (
                       <>
-                        Send Message <Send className="w-5 h-5" />
+                        Send Message <ArrowRight className="w-5 h-5" />
                       </>
                     )}
                   </motion.button>
                 </>
               )}
-
             </form>
           </motion.div>
-
         </motion.div>
       </div>
     </motion.section>
   );
 }
+
+
+export default ContactPage

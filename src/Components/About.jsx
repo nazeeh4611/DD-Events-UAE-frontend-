@@ -139,10 +139,10 @@ export default function AboutPage() {
 
   const team = [
     {
-      name: 'Sarah Al Mansoori',
+      name: 'Mariya Rose Varghese',
       role: 'Founder & CEO',
-      expertise: '15+ years in luxury events',
-      avatar: 'SA',
+      expertise: 'Creative Entrepreneur & Event Specialist',
+      avatar: 'MR',
       color: '#4A7BFF'
     },
     {
@@ -251,7 +251,6 @@ export default function AboutPage() {
         }
       `}</style>
 
-      {/* Hero Section */}
       <section ref={aboutRef} className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
         <motion.div 
           className="absolute inset-0"
@@ -395,7 +394,6 @@ export default function AboutPage() {
         </motion.div>
       </section>
 
-      {/* Our Story Section */}
       <section id="story" className="relative py-32 bg-gradient-to-b from-black to-[#0a0a1a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -413,7 +411,6 @@ export default function AboutPage() {
             </p>
           </motion.div>
 
-          {/* Timeline */}
           <div className="relative timeline-line">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {timeline.map((item, index) => (
@@ -455,7 +452,6 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* Mission & Vision */}
           <div className="grid md:grid-cols-2 gap-8 mt-20">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -504,7 +500,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Values Section */}
       <section className="relative py-32 bg-[#0a0a1a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -565,7 +560,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team Section */}
       <section id="team" className="relative py-32 bg-gradient-to-b from-[#0a0a1a] to-black">
         <div className="absolute inset-0">
           <motion.div
@@ -632,37 +626,9 @@ export default function AboutPage() {
               </motion.div>
             ))}
           </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="glass p-8 rounded-3xl mt-12 text-center"
-          >
-            <div className="max-w-3xl mx-auto">
-              <h3 className="text-2xl font-bold text-white mb-4">Join Our Team</h3>
-              <p className="text-gray-400 mb-6">
-                We're always looking for passionate individuals who share our commitment to excellence. 
-                If you have the talent and drive to create magic, we'd love to hear from you.
-              </p>
-              <motion.a
-                href="mailto:careers@diamonddreams.ae"
-                whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(74, 123, 255, 0.3)" }}
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-full text-white font-medium"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(74, 123, 255, 0.1), rgba(156, 243, 255, 0.1))',
-                  border: '1px solid rgba(74, 123, 255, 0.2)'
-                }}
-              >
-                <Mail className="w-4 h-4" />
-                careers@diamonddreams.ae
-              </motion.a>
-            </div>
-          </motion.div>
         </div>
       </section>
 
-      {/* Achievements Section */}
       <section className="relative py-32 bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -704,74 +670,6 @@ export default function AboutPage() {
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="relative py-32 bg-gradient-to-b from-black via-[#0a0a1a] to-black">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="glass p-12 md:p-16 rounded-3xl text-center relative overflow-hidden"
-          >
-            <motion.div
-              className="absolute inset-0 opacity-20"
-              animate={{
-                background: [
-                  'radial-gradient(circle at 0% 0%, #4A7BFF 0%, transparent 50%)',
-                  'radial-gradient(circle at 100% 100%, #9CF3FF 0%, transparent 50%)',
-                  'radial-gradient(circle at 0% 0%, #4A7BFF 0%, transparent 50%)',
-                ],
-              }}
-              transition={{ duration: 10, repeat: Infinity }}
-            />
-
-            <div className="relative z-10">
-              <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-                <span className="text-white">Let's Create</span>
-                <span className="gradient-text"> Together</span>
-              </h2>
-              <p className="text-gray-400 text-lg mb-10 max-w-2xl mx-auto">
-                Ready to bring your vision to life? Partner with the team that turns dreams into reality.
-              </p>
-
-              <motion.a
-                href="mailto:info@diamonddreams.ae"
-                whileHover={{ scale: 1.05, boxShadow: "0 20px 60px rgba(74, 123, 255, 0.5)" }}
-                whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center gap-3 px-12 py-5 gradient-bg rounded-full text-white text-lg font-bold mb-8 shine-effect"
-              >
-                Start Your Journey
-                <ArrowRight className="w-6 h-6" />
-              </motion.a>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-                <div className="flex flex-col items-center gap-3">
-                  <Phone className="w-6 h-6 text-[#9CF3FF]" />
-                  <div>
-                    <p className="text-gray-400 text-sm mb-1">Call Us</p>
-                    <p className="text-white font-semibold">+971 522 703 351</p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-center gap-3">
-                  <MapPin className="w-6 h-6 text-[#9CF3FF]" />
-                  <div>
-                    <p className="text-gray-400 text-sm mb-1">Visit Us</p>
-                    <p className="text-white font-semibold">Al Falah St, Abu Dhabi</p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-center gap-3">
-                  <Mail className="w-6 h-6 text-[#9CF3FF]" />
-                  <div>
-                    <p className="text-gray-400 text-sm mb-1">Email</p>
-                    <p className="text-white font-semibold">info@diamonddreams.ae</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </section>
     </div>

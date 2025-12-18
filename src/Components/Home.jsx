@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
 import { 
   ArrowRight, 
   Sparkles, 
@@ -23,18 +24,56 @@ import {
   Users,
   Clock,
   Target,
-  Zap
+  Zap,
+  X,
+  ChevronLeft,
+  ChevronRight as ChevronRightIcon,
+  Share2,
+  Heart as HeartIcon,
+  Download,
+  Maximize2,
+  Grid3x3
 } from 'lucide-react';
+import baseURL from '../Services/Base';
 
 export default function Homepage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [currentWord, setCurrentWord] = useState(0);
+  const [featuredEvents, setFeaturedEvents] = useState([]);
+  const [portfolioEvents, setPortfolioEvents] = useState([]);
+  const [allPortfolioEvents, setAllPortfolioEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [modalImageIndex, setModalImageIndex] = useState(0);
+  const [showAllPortfolio, setShowAllPortfolio] = useState(false);
   const { scrollYProgress } = useScroll();
   const heroRef = useRef(null);
   
   const words = ["Extraordinary", "Unforgettable", "Magical", "Exceptional"];
   const headerOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const headerScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        
+        const featuredResponse = await axios.get(`${baseURL}/events?featured=true&limit=3`);
+        setFeaturedEvents(featuredResponse.data.events || []);
+
+        const portfolioResponse = await axios.get(`${baseURL}/events?status=published&limit=12`);
+        const events = portfolioResponse.data.events || [];
+        setAllPortfolioEvents(events);
+        setPortfolioEvents(events.slice(0, 6));
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -146,21 +185,50 @@ export default function Homepage() {
     }
   ];
 
-  const portfolioImages = [
-    '/images/portfolio1.jpg',
-    '/images/portfolio2.jpg',
-    '/images/portfolio3.jpg',
-    '/images/portfolio4.jpg',
-    '/images/portfolio5.jpg',
-    '/images/portfolio6.jpg'
-  ];
+  const handleEventClick = (event) => {
+    setSelectedEvent(event);
+    setModalImageIndex(0);
+    document.body.style.overflow = 'hidden';
+  };
 
-  const teamMembers = [
-    { name: 'Sarah Johnson', role: 'Creative Director', image: '/images/team1.jpg' },
-    { name: 'Michael Chen', role: 'Event Producer', image: '/images/team2.jpg' },
-    { name: 'Aisha Al Rashid', role: 'Client Relations', image: '/images/team3.jpg' },
-    { name: 'David Wilson', role: 'Operations Manager', image: '/images/team4.jpg' }
-  ];
+  const handleCloseModal = () => {
+    setSelectedEvent(null);
+    document.body.style.overflow = 'auto';
+  };
+
+  const handlePrevImage = () => {
+    setModalImageIndex(prev => 
+      prev === 0 ? (selectedEvent?.images?.length || 1) - 1 : prev - 1
+    );
+  };
+
+  const handleNextImage = () => {
+    setModalImageIndex(prev => 
+      prev === (selectedEvent?.images?.length || 1) - 1 ? 0 : prev + 1
+    );
+  };
+
+  const handleViewMore = () => {
+    setShowAllPortfolio(!showAllPortfolio);
+  };
+
+  // Helper function to format location object
+  const formatLocation = (location) => {
+    if (!location) return "Abu Dhabi";
+    
+    if (typeof location === 'string') return location;
+    
+    if (typeof location === 'object') {
+      // Handle location object
+      if (location.address) return location.address;
+      if (location.city) return location.city;
+      if (location.name) return location.name;
+    }
+    
+    return "Abu Dhabi";
+  };
+
+  const displayedPortfolioEvents = showAllPortfolio ? allPortfolioEvents : portfolioEvents;
 
   return (
     <div className="bg-black text-white overflow-hidden">
@@ -250,11 +318,216 @@ export default function Homepage() {
           filter: brightness(1.1);
         }
         
-        .image-mask {
-          mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 80%, rgba(0,0,0,0));
-          -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 80%, rgba(0,0,0,0));
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.9);
+          backdrop-filter: blur(10px);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1rem;
+        }
+        
+        .modal-content {
+          width: 100%;
+          max-width: 1200px;
+          max-height: 90vh;
+          overflow-y: auto;
+        }
+        
+        .modal-image-container {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .modal-image {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+        }
+        
+        @media (max-width: 768px) {
+          .modal-content {
+            max-height: 95vh;
+          }
+          
+          .modal-image-container {
+            height: 300px;
+          }
         }
       `}</style>
+
+      <AnimatePresence>
+        {selectedEvent && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="modal-overlay"
+            onClick={handleCloseModal}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25 }}
+              className="modal-content"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="glass rounded-3xl overflow-hidden">
+                <div className="relative h-[400px] md:h-[500px] bg-black">
+                  <div className="modal-image-container">
+                    <img 
+                      src={selectedEvent.images && selectedEvent.images[modalImageIndex] ? selectedEvent.images[modalImageIndex] : '/images/placeholder.jpg'} 
+                      alt={`${selectedEvent.title || 'Event'} - Image ${modalImageIndex + 1}`}
+                      className="modal-image"
+                    />
+                  </div>
+                  
+                  <button
+                    onClick={handleCloseModal}
+                    className="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center hover:bg-black/70 transition-colors z-10"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                  
+                  {selectedEvent.images && selectedEvent.images.length > 1 && (
+                    <>
+                      <button
+                        onClick={handlePrevImage}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center hover:bg-black/70 transition-colors"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={handleNextImage}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center hover:bg-black/70 transition-colors"
+                      >
+                        <ChevronRightIcon className="w-5 h-5" />
+                      </button>
+                    </>
+                  )}
+                  
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                    {selectedEvent.images && selectedEvent.images.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setModalImageIndex(idx)}
+                        className={`w-2 h-2 rounded-full transition-all ${idx === modalImageIndex ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/70'}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="p-8">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                      <h2 className="font-display text-3xl md:text-4xl font-bold mb-2">{selectedEvent.title || 'Event'}</h2>
+                      <div className="flex items-center gap-4 text-gray-400">
+                        <span className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          {selectedEvent.formattedDate || selectedEvent.date || 'Date not specified'}
+                        </span>
+                        <span className="px-3 py-1 rounded-full bg-[#4A7BFF]/10 text-[#4A7BFF] text-sm">
+                          {selectedEvent.eventType || 'Event'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <button className="p-2 rounded-lg hover:bg-white/5 transition-colors">
+                        <Share2 className="w-5 h-5" />
+                      </button>
+                      <button className="p-2 rounded-lg hover:bg-white/5 transition-colors">
+                        <HeartIcon className="w-5 h-5" />
+                      </button>
+                      <button className="p-2 rounded-lg hover:bg-white/5 transition-colors">
+                        <Download className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="md:col-span-2">
+                      <p className="text-gray-300 leading-relaxed mb-6">
+                        {selectedEvent.description || "An extraordinary event crafted with precision and passion. Every detail was carefully planned and executed to create a memorable experience."}
+                      </p>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-8">
+                        <div className="glass p-4 rounded-xl">
+                          <div className="text-gray-400 text-sm mb-1">Location</div>
+                          <div className="font-semibold">{formatLocation(selectedEvent.location)}</div>
+                        </div>
+                        <div className="glass p-4 rounded-xl">
+                          <div className="text-gray-400 text-sm mb-1">Guests</div>
+                          <div className="font-semibold">{selectedEvent.guests || selectedEvent.guestCount || "200+"}</div>
+                        </div>
+                      </div>
+                      
+                      <div className="mb-8">
+                        <h3 className="text-xl font-bold mb-4">Event Highlights</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          {selectedEvent.highlights && Array.isArray(selectedEvent.highlights) ? (
+                            selectedEvent.highlights.map((highlight, idx) => (
+                              <div key={idx} className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-[#4A7BFF]" />
+                                <span className="text-gray-300">{highlight}</span>
+                              </div>
+                            ))
+                          ) : (
+                            <>
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-[#4A7BFF]" />
+                                <span className="text-gray-300">Premium Decor</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-[#4A7BFF]" />
+                                <span className="text-gray-300">Live Entertainment</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-[#4A7BFF]" />
+                                <span className="text-gray-300">Gourmet Catering</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-[#4A7BFF]" />
+                                <span className="text-gray-300">Professional Photography</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-xl font-bold mb-4">Event Gallery</h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        {selectedEvent.images && selectedEvent.images.slice(0, 4).map((img, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setModalImageIndex(idx)}
+                            className={`aspect-square rounded-xl overflow-hidden ${modalImageIndex === idx ? 'ring-2 ring-[#4A7BFF]' : ''}`}
+                          >
+                            <img 
+                              src={img} 
+                              alt={`Gallery ${idx + 1}`}
+                              className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <motion.div 
@@ -308,35 +581,35 @@ export default function Homepage() {
         </motion.div>
 
         <motion.div
-          className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+          initial={{ opacity: 0, scale: 0.5, y: -50 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="absolute top-20 sm:top-24 md:top-28 left-1/2 -translate-x-1/2 z-20"
+        >
+          <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 relative">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: 'conic-gradient(from 0deg, #4A7BFF, #9CF3FF, #4A7BFF)',
+                opacity: 0.3,
+                filter: 'blur(20px)',
+              }}
+            />
+            <img 
+              src="/dlogo.webp" 
+              alt="Diamond Dreams"
+              className="relative w-full h-full object-contain"
+            />
+          </div>
+        </motion.div>
+
+        <motion.div
+          className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-40 sm:pt-48 md:pt-52 lg:pt-56"
           style={{ opacity: headerOpacity, scale: headerScale }}
         >
           <div className="text-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="mb-12"
-            >
-              <div className="w-32 h-32 mx-auto mb-6 relative">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-0 rounded-full"
-                  style={{
-                    background: 'conic-gradient(from 0deg, #4A7BFF, #9CF3FF, #4A7BFF)',
-                    opacity: 0.3,
-                    filter: 'blur(20px)',
-                  }}
-                />
-                <img 
-                  src="/dlogo.webp" 
-                  alt="Diamond Dreams"
-                  className="relative w-full h-full object-contain"
-                />
-              </div>
-            </motion.div>
-
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -452,31 +725,58 @@ export default function Homepage() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            {portfolioImages.slice(0, 3).map((image, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="relative overflow-hidden rounded-3xl group cursor-pointer"
-              >
-                <div className="aspect-video relative overflow-hidden">
-                  <img 
-                    src={image} 
-                    alt={`Event ${index + 1}`}
-                    className="w-full h-full object-cover image-hover-effect"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                    <div className="text-white">
-                      <h3 className="text-xl font-bold mb-2">Event Showcase {index + 1}</h3>
-                      <p className="text-gray-300 text-sm">View details</p>
+            {loading ? (
+              [...Array(3)].map((_, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="relative overflow-hidden rounded-3xl group cursor-pointer"
+                >
+                  <div className="aspect-video relative overflow-hidden bg-gray-800 animate-pulse" />
+                </motion.div>
+              ))
+            ) : featuredEvents.length > 0 ? (
+              featuredEvents.slice(0, 3).map((event, index) => (
+                <motion.div
+                  key={event._id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  onClick={() => handleEventClick(event)}
+                  className="relative overflow-hidden rounded-3xl group cursor-pointer"
+                >
+                  <div className="aspect-video relative overflow-hidden">
+                    <img 
+                      src={event.images && event.images[0] ? event.images[0] : '/images/placeholder.jpg'} 
+                      alt={event.title || 'Event'}
+                      className="w-full h-full object-cover image-hover-effect"
+                    />
+                    
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500">
+                      <div className="absolute bottom-0 left-0 right-0 p-8">
+                        <h3 className="text-2xl font-bold mb-2 text-white">{event.title || 'Event'}</h3>
+                        <p className="text-gray-300 mb-3">{event.eventType || 'Event Type'}</p>
+                        <p className="text-gray-400 text-sm mb-4">{event.formattedDate || event.date || 'Date not specified'}</p>
+                        <div className="flex items-center gap-2 text-[#9CF3FF]">
+                          <span className="text-sm font-medium">View Details</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                  
+                  <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-sm">
+                    {event.eventType || 'Event'}
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <p className="text-gray-400 col-span-3 text-center">No featured events available</p>
+            )}
           </div>
         </div>
       </section>
@@ -576,28 +876,82 @@ export default function Homepage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {portfolioImages.map((image, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                whileHover={{ scale: 1.05, zIndex: 10 }}
-                className="relative aspect-square overflow-hidden rounded-2xl cursor-pointer group"
-              >
-                <img 
-                  src={image} 
-                  alt={`Portfolio ${index + 1}`}
-                  className="w-full h-full object-cover image-hover-effect"
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
+            {loading ? (
+              [...Array(6)].map((_, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  className="relative aspect-square overflow-hidden rounded-2xl bg-gray-800 animate-pulse"
                 />
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <Camera className="w-8 h-8 text-white" />
-                </div>
-              </motion.div>
-            ))}
+              ))
+            ) : displayedPortfolioEvents.length > 0 ? (
+              displayedPortfolioEvents.map((event, index) => (
+                <motion.div
+                  key={event._id}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => handleEventClick(event)}
+                  whileHover={{ scale: 1.05, zIndex: 10 }}
+                  className="relative aspect-square overflow-hidden rounded-2xl cursor-pointer group"
+                >
+                  <img 
+                    src={event.images && event.images[0] ? event.images[0] : '/images/placeholder.jpg'} 
+                    alt={event.title || 'Event'}
+                    className="w-full h-full object-cover image-hover-effect"
+                  />
+                  
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-4">
+                    <Camera className="w-8 h-8 text-white mb-3" />
+                    <h3 className="text-white font-bold text-center text-sm">{event.title || 'Event'}</h3>
+                    <p className="text-gray-300 text-xs mt-1 text-center">{event.eventType || 'Event Type'}</p>
+                  </div>
+                  
+                  <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-xs">
+                    {event.eventType || 'Event'}
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <p className="text-gray-400 col-span-6 text-center">No portfolio events available</p>
+            )}
           </div>
+
+          {allPortfolioEvents.length > 6 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <motion.button
+                onClick={handleViewMore}
+                whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(74, 123, 255, 0.3)" }}
+                whileTap={{ scale: 0.98 }}
+                className="px-8 py-4 glass rounded-full text-white font-semibold flex items-center gap-3 mx-auto"
+              >
+                <Grid3x3 className="w-5 h-5" />
+                {showAllPortfolio ? 'Show Less' : 'View More Events'}
+                {showAllPortfolio ? (
+                  <ChevronRight className="w-5 h-5 rotate-90" />
+                ) : (
+                  <ChevronRight className="w-5 h-5 -rotate-90" />
+                )}
+              </motion.button>
+              
+              <p className="text-gray-400 text-sm mt-4">
+                {showAllPortfolio 
+                  ? `Showing all ${allPortfolioEvents.length} events`
+                  : `Showing 6 of ${allPortfolioEvents.length} events`
+                }
+              </p>
+            </motion.div>
+          )}
         </div>
       </section>
 
@@ -611,55 +965,7 @@ export default function Homepage() {
           >
             <h2 className="font-display text-4xl md:text-5xl font-bold mb-6">
               <span className="text-white">Our </span>
-              <span className="gradient-text">Team</span>
-            </h2>
-            <p className="text-gray-400 text-lg">
-              Meet the creative minds behind Diamond Dreams
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {teamMembers.map((member, index) => (
-              <motion.div
-                key={member.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.15 }}
-                whileHover={{ y: -8 }}
-                className="glass p-6 rounded-3xl text-center group"
-              >
-                <div className="relative w-32 h-32 mx-auto mb-6 overflow-hidden rounded-full">
-                  <img 
-                    src={member.image} 
-                    alt={member.name}
-                    className="w-full h-full object-cover image-hover-effect"
-                  />
-                  <div className="absolute inset-0 rounded-full border-2 border-transparent group-hover:border-[#4A7BFF] transition-colors duration-300" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">{member.name}</h3>
-                <p className="text-gray-400 mb-4">{member.role}</p>
-                <div className="flex justify-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#4A7BFF]" />
-                  <div className="w-2 h-2 rounded-full bg-[#9CF3FF]" />
-                  <div className="w-2 h-2 rounded-full bg-[#FF6B9D]" />
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="relative py-32 bg-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
-            <h2 className="font-display text-4xl md:text-5xl font-bold mb-6">
-              <span className="gradient-text">Our Process</span>
+              <span className="gradient-text">Process</span>
             </h2>
             <p className="text-gray-400 text-lg">
               A proven approach to delivering exceptional events
